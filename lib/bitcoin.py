@@ -25,6 +25,7 @@
 
 import hashlib
 import hmac
+import struct
 
 from .util import bfh, bh2u, BitcoinException, print_error, assert_bytes, to_bytes, inv_dict
 from . import version
@@ -49,6 +50,9 @@ TYPE_SCRIPT  = 2
 def rev_hex(s):
     return bh2u(bfh(s)[::-1])
 
+
+hash_to_str = lambda x: bytes(reversed(x)).hex()
+str_to_hash = lambda x: bytes(reversed(bytes.fromhex(x)))
 
 def int_to_hex(i: int, length: int=1) -> str:
     """Converts int to little-endian hex string.
@@ -289,6 +293,35 @@ def address_to_script(addr, *, net=None):
     else:
         raise BitcoinException('unknown address type: {}'.format(addrtype))
     return script
+
+def ser_char_vector(l):
+    if l is None:
+        l = b''
+    if len(l) < 253:
+        r = struct.pack("<B", len(l))
+    elif len(l) < 0x10000:
+        r = struct.pack("<B", 253) + struct.pack("<H", len(l))
+    elif len(l) < 0x100000000:
+        r = struct.pack("<B", 254) + struct.pack("<I", len(l))
+    else:
+        r = struct.pack("<B", 255) + struct.pack("<Q", len(l))
+    r += bytes(l)
+    return r
+
+
+def deser_char_vector(f):
+    nit = struct.unpack("<B", f.read(1))[0]
+    if nit == 253:
+        nit = struct.unpack("<H", f.read(2))[0]
+    elif nit == 254:
+        nit = struct.unpack("<I", f.read(4))[0]
+    elif nit == 255:
+        nit = struct.unpack("<Q", f.read(8))[0]
+    r = []
+    for i in range(nit):
+        t = struct.unpack("<B", f.read(1))[0]
+        r.append(t)
+    return r
 
 def address_to_scripthash(addr):
     script = address_to_script(addr)

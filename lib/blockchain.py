@@ -22,9 +22,16 @@
 # SOFTWARE.
 import os
 import threading
+import struct
+from io import BytesIO
 
 from . import util
-from .bitcoin import Hash, hash_encode, int_to_hex, rev_hex
+from . import bitcoin
+#from .bitcoin import Hash, hash_encode, int_to_hex, rev_hex
+from .bitcoin import *
+import base64
+
+from .equihash import is_gbp_valid
 from . import constants
 from .util import bfh, bh2u
 
@@ -34,29 +41,31 @@ MAX_TARGET = 0x00000000FFFF0000000000000000000000000000000000000000000000000000
 class MissingHeader(Exception):
     pass
 
-
 def serialize_header(res):
-    s = int_to_hex(res.get('version'), 4) \
-        + rev_hex(res.get('prev_block_hash')) \
-        + rev_hex(res.get('merkle_root')) \
-        + int_to_hex(int(res.get('timestamp')), 4) \
-        + int_to_hex(int(res.get('bits')), 4) \
-        + int_to_hex(int(res.get('nonce')), 4)
-    return s
+    print(res)
+    r = b''
+    r += struct.pack("<i", res.get('version'))
+    r += str_to_hash(res.get('prev_block_hash'))
+    r += str_to_hash(res.get('merkle_root'))
+    r += str_to_hash(res.get('hash_reserved') or '00')
+    r += struct.pack("<I", res.get('timestamp'))
+    r += struct.pack("<I", res.get('bits'))
+    r += str_to_hash(res.get('nonce'))
+    if res.get('n_solution'):
+        r += ser_char_vector(base64.b64decode( (res.get('n_solution')).encode('utf8')))
+    return r
 
-def deserialize_header(s, height):
-    if not s:
-        raise Exception('Invalid header: {}'.format(s))
-    if len(s) != 1487:
-        raise Exception('Invalid header length: {}'.format(len(s)))
-    hex_to_int = lambda s: int('0x' + bh2u(s[::-1]), 16)
+def deserialize_header(f, height):
+    f = BytesIO(f)
     h = {}
-    h['version'] = hex_to_int(s[0:4])
-    h['prev_block_hash'] = hash_encode(s[4:36])
-    h['merkle_root'] = hash_encode(s[36:68])
-    h['timestamp'] = hex_to_int(s[68:72])
-    h['bits'] = hex_to_int(s[72:76])
-    h['nonce'] = hex_to_int(s[76:80])
+    h['version'] = struct.unpack("<I", f.read(4))[0]
+    h['prev_block_hash'] = hash_to_str(f.read(32))
+    h['merkle_root'] = hash_to_str(f.read(32))
+    #h['hash_reserved'] = hash_to_str(f.read(32))
+    h['timestamp'] = struct.unpack("<I", f.read(4))[0]
+    h['bits'] = struct.unpack("<I", f.read(4))[0]
+    h['nonce'] = hash_to_str(f.read(32))
+    h['n_solution'] = base64.b64encode(bytes(deser_char_vector(f))).decode('utf8')
     h['block_height'] = height
     return h
 
@@ -65,7 +74,7 @@ def hash_header(header):
         return '0' * 64
     if header.get('prev_block_hash') is None:
         header['prev_block_hash'] = '00'*32
-    return hash_encode(Hash(bfh(serialize_header(header))))
+    return hash_to_str(Hash(serialize_header(header)))
 
 
 blockchains = {}
@@ -168,6 +177,10 @@ class Blockchain(util.PrintError):
             raise Exception("bits mismatch: %s vs %s" % (bits, header.get('bits')))
         if int('0x' + _hash, 16) > target:
             raise Exception("insufficient proof of work: %s vs target %s" % (int('0x' + _hash, 16), target))
+        nonce = uint256_from_bytes(str_to_hash(header.get('nonce')))
+        n_solution = vector_from_bytes(base64.b64decode(header.get('n_solution').encode('utf8')))
+        if not is_gbp_valid(serialize_header(header), nonce, n_solution, 200, 9):
+            raise BaseException("Equihash invalid")
 
     def verify_chunk(self, index, data):
         num = len(data) // 80
