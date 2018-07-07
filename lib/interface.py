@@ -68,7 +68,7 @@ class TcpConnection(threading.Thread, util.PrintError):
         self.host, self.port, self.protocol = self.server.rsplit(':', 2)
         self.host = str(self.host)
         self.port = int(self.port)
-        self.use_ssl = (self.protocol == 's')
+        self.use_ssl = False # (self.protocol == 's')
         self.daemon = True
 
     def diagnostic_name(self):

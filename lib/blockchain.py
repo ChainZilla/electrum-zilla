@@ -47,7 +47,7 @@ def serialize_header(res):
 def deserialize_header(s, height):
     if not s:
         raise Exception('Invalid header: {}'.format(s))
-    if len(s) != 80:
+    if len(s) != 1487:
         raise Exception('Invalid header length: {}'.format(len(s)))
     hex_to_int = lambda s: int('0x' + bh2u(s[::-1]), 16)
     h = {}
