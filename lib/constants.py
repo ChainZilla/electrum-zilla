@@ -40,9 +40,9 @@ def read_json(filename, default):
 class BitcoinMainnet:
 
     TESTNET = False
-    WIF_PREFIX = 0x80
-    ADDRTYPE_P2PKH = 0
-    ADDRTYPE_P2SH = 5
+    WIF_PREFIX = 0x55
+    ADDRTYPE_P2PKH = 0x3c
+    ADDRTYPE_P2SH = 0xbc
     SEGWIT_HRP = "bc"
     GENESIS = "027e3758c3a65b12aa1046462b486d0a63bfa1beae327897f56c5cfb7daaae71"
     DEFAULT_PORTS = {'t': '50001', 's': '50002'}
