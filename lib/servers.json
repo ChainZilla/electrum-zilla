@@ -1,9 +1,4 @@
 {
-    "158.69.0.198": {
-        "pruning": "-",
-        "s": "10028",
-        "version": "1.2"
-    },
     "electrum1.cipig.net": {
         "pruning": "-",
         "s": "10028",
