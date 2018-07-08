@@ -1266,8 +1266,8 @@ class Abstract_Wallet(PrintError):
 
         # Sort the inputs and outputs deterministically
         tx.BIP_LI01_sort()
-        # Timelock tx to current height.
-        tx.locktime = self.get_local_height()
+        # Timelock tx to next height
+        tx.locktime = self.get_local_height() + 1
         run_hook('make_unsigned_transaction', self, tx)
         return tx
 
