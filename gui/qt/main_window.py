@@ -665,7 +665,7 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
         return self.decimal_point
 
     def base_unit(self):
-        return decimal_point_to_base_unit_name(self.decimal_point)
+        return 'ZILLA' # decimal_point_to_base_unit_name(self.decimal_point)
 
     def connect_fields(self, window, btc_e, fiat_e, fee_e):
 
