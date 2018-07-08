@@ -156,6 +156,7 @@ class Blockchain(util.PrintError):
         return self
 
     def height(self):
+        print("height=", self.checkpoint + self.size() - 1 )
         return self.checkpoint + self.size() - 1
 
     def size(self):

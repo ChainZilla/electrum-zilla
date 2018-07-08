@@ -252,7 +252,7 @@ class ElectrumWindow(App):
 
         App.__init__(self)#, **kwargs)
 
-        title = _('Electrum App')
+        title = _('Electrum-Zilla App')
         self.electrum_config = config = kwargs.get('config', None)
         self.language = config.get('language', 'en')
         self.network = network = kwargs.get('network', None)
@@ -514,7 +514,7 @@ class ElectrumWindow(App):
             else:
                 self.load_wallet(wallet)
         else:
-            Logger.debug('Electrum: Wallet not found or action needed. Launching install wizard')
+            Logger.debug('Electrum-Zilla: Wallet not found or action needed. Launching install wizard')
 
             def launch_wizard():
                 storage = WalletStorage(path, manual_upgrades=True)

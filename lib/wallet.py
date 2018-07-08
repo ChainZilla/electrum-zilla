@@ -466,6 +466,7 @@ class Abstract_Wallet(PrintError):
             self.unverified_tx.pop(tx_hash, None)
             self.verified_tx[tx_hash] = info  # (tx_height, timestamp, pos)
         height, conf, timestamp = self.get_tx_height(tx_hash)
+        print(height,conf,timestamp)
         self.network.trigger_callback('verified', tx_hash, height, conf, timestamp)
 
     def get_unverified_txs(self):

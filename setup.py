@@ -18,7 +18,7 @@ with open('contrib/requirements/requirements-hw.txt') as f:
 version = imp.load_source('version', 'lib/version.py')
 
 if sys.version_info[:3] < (3, 4, 0):
-    sys.exit("Error: Electrum requires Python version >= 3.4.0...")
+    sys.exit("Error: Electrum-Zilla requires Python version >= 3.4.0...")
 
 data_files = []
 
@@ -49,7 +49,7 @@ extras_require['full'] = extras_require['hardware'] + extras_require['fast']
 
 
 setup(
-    name="Electrum",
+    name="Electrum-Zilla",
     version=version.ELECTRUM_VERSION,
     install_requires=requirements,
     extras_require=extras_require,
