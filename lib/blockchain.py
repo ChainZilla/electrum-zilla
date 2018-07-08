@@ -126,6 +126,9 @@ class Blockchain(util.PrintError):
         with self.lock:
             self.update_size()
 
+        print("checkpoints:")
+        print(self.get_checkpoints())
+
     def parent(self):
         return blockchains[self.parent_id]
 
@@ -156,7 +159,7 @@ class Blockchain(util.PrintError):
         return self
 
     def height(self):
-        print("height=", self.checkpoint + self.size() - 1 )
+        # print("height=", self.checkpoint + self.size() - 1 )
         return self.checkpoint + self.size() - 1
 
     def size(self):
