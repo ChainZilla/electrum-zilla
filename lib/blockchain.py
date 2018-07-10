@@ -42,7 +42,7 @@ class MissingHeader(Exception):
     pass
 
 def serialize_header(res):
-    print("serialize_header=", res.get('n_solution') )
+    print("serialize_header:",res)
     r = b''
     r += struct.pack("<i", res.get('version'))
     r += str_to_hash(res.get('prev_block_hash'))
@@ -51,7 +51,8 @@ def serialize_header(res):
     r += struct.pack("<I", res.get('timestamp'))
     r += struct.pack("<I", res.get('bits'))
     r += str_to_hash(res.get('nonce'))
-    r += ser_char_vector(base64.b64decode( (res.get('n_solution')).encode('utf8')))
+    if res.get('block_height') > 0:
+        r += ser_char_vector(base64.b64decode( (res.get('n_solution')).encode('utf8')))
     return r
 
 def deserialize_header(f, height):
@@ -64,7 +65,8 @@ def deserialize_header(f, height):
     h['timestamp'] = struct.unpack("<I", f.read(4))[0]
     h['bits'] = struct.unpack("<I", f.read(4))[0]
     h['nonce'] = hash_to_str(f.read(32))
-    h['n_solution'] = base64.b64encode(bytes(deser_char_vector(f))).decode('utf8')
+    if height > 0:
+        h['n_solution'] = base64.b64encode(bytes(deser_char_vector(f))).decode('utf8')
     h['block_height'] = height
     return h
 

@@ -1179,6 +1179,7 @@ class Network(util.DaemonThread):
         invocation(callback)
 
     def request_header(self, interface, height):
+        print("requesting header for height=", height)
         self.queue_request('blockchain.block.get_header', [height], interface)
         interface.request = height
         interface.req_time = time.time()
