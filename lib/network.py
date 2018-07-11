@@ -650,7 +650,7 @@ class Network(util.DaemonThread):
 
         for callback in callbacks:
             callback(response)
-
+ 
     @classmethod
     def get_index(cls, method, params):
         """ hashable index for subscriptions and cache"""
@@ -840,12 +840,13 @@ class Network(util.DaemonThread):
                     self.request_fee_estimates()
 
     def request_chunk(self, interface, index):
+        print("request_chunk i=", index)
         if index in self.requested_chunks:
             return
         interface.print_error("requesting chunk %d" % index)
         self.requested_chunks.add(index)
-        height = index * 2016
-        self.queue_request('blockchain.block.headers', [height, 2016],
+        height = index * constants.net.CHUNK_SIZE
+        self.queue_request('blockchain.block.headers', [height, constants.net.CHUNK_SIZE],
                            interface)
 
     def on_block_headers(self, interface, response):
@@ -859,8 +860,8 @@ class Network(util.DaemonThread):
             return
         # Ignore unsolicited chunks
         height = params[0]
-        index = height // 2016
-        if index * 2016 != height or index not in self.requested_chunks:
+        index = height // constants.net.CHUNK_SIZE
+        if index * constants.net.CHUNK_SIZE != height or index not in self.requested_chunks:
             interface.print_error("received chunk %d (unsolicited)" % index)
             return
         else:
@@ -1000,7 +1001,7 @@ class Network(util.DaemonThread):
         # If not finished, get the next header
         if next_height is not None:
             if interface.mode == 'catch_up' and interface.tip > next_height + 50:
-                self.request_chunk(interface, next_height // 2016)
+                self.request_chunk(interface, next_height // constants.net.CHUNK_SIZE)
             else:
                 self.request_header(interface, next_height)
         else:
@@ -1042,9 +1043,10 @@ class Network(util.DaemonThread):
             self.process_responses(interface)
 
     def init_headers_file(self):
+        print("init_headers_file")
         b = self.blockchains[0]
         filename = b.path()
-        length = 80 * len(constants.net.CHECKPOINTS) * 2016
+        length = bitcoin.HEADER_SIZE * len(constants.net.CHECKPOINTS) * constants.net.CHUNK_SIZE
         if not os.path.exists(filename) or os.path.getsize(filename) < length:
             with open(filename, 'wb') as f:
                 if length>0:
@@ -1291,4 +1293,4 @@ class Network(util.DaemonThread):
 
     @classmethod
     def max_checkpoint(cls):
-        return max(0, len(constants.net.CHECKPOINTS) * 2016 - 1)
+        return max(0, len(constants.net.CHECKPOINTS) * constants.net.CHUNK_SIZE - 1)

@@ -48,6 +48,7 @@ class BitcoinMainnet:
     DEFAULT_PORTS = {'t': '10028', 's': '10028'}
     DEFAULT_SERVERS = read_json('servers.json', {})
     CHECKPOINTS = [ ] # TODO: fix read_json('checkpoints.json', [])
+    CHUNK_SIZE  = 200
 
     XPRV_HEADERS = {
         'standard':    0x0488ade4,  # xprv
@@ -77,6 +78,7 @@ class BitcoinTestnet:
     DEFAULT_PORTS = {'t': '10028', 's': '10028'}
     DEFAULT_SERVERS = read_json('servers_testnet.json', {})
     CHECKPOINTS = read_json('checkpoints_testnet.json', [])
+    CHUNK_SIZE  = 200
 
     XPRV_HEADERS = {
         'standard':    0x04358394,  # tprv
